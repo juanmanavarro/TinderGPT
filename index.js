@@ -50,4 +50,6 @@ new CronJob(
 );
 
 // test dev
-newPublication();
+if ( process.env.DEV ) {
+  newPublication();
+}
