@@ -2,12 +2,20 @@ import axios from 'axios';
 import { Config } from '../sites/citas-online.info/config.js';
 
 export class WpApi {
-  static async getLastPostTitles() {
+  client;
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: '',
+      headers: {
+        Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
+      },
+    });
+  }
+
+  async getLastPostTitles() {
     try {
       const response = await axios.get(`${process.env[`${Config.prefix}WP_URL`]}/posts`, {
-        headers: {
-          Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
-        },
         params: {
           fields: 'title',
           number: 10,
@@ -20,15 +28,11 @@ export class WpApi {
     }
   }
 
-  static async publish(title, content) {
+  async publish(title, content) {
     try {
       const { status } = await axios.post(`${process.env[`${Config.prefix}WP_URL`]}/posts/new`, {
         title,
         content,
-      }, {
-        headers: {
-          Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
-        },
       });
       return status;
     } catch (error) {
