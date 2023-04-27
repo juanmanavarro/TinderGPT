@@ -1,14 +1,10 @@
-import { Configuration, OpenAIApi } from "openai";
 import { CronJob } from 'cron';
 import dotenv from 'dotenv';
 import { Config } from './sites/citas-online.info/config.js';
 import { WpApi } from './shared/wp-api.js';
+import { OpenAI } from './shared/openai.js';
 
 dotenv.config();
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
 const spanishDateApps = [
   'Tinder',
@@ -30,70 +26,28 @@ const randomDateApp = () => {
   return spanishDateApps[randomIndex];
 };
 
-const generatePostTitle = async () => {
+const newPublication = async () => {
+  console.log('Publishing...');
+
   const lastTitles = WpApi.getLastPostTitles();
-  try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [{
-        role: 'user',
-        content: Config.getTitlePrompt(lastTitles, { appTitle: randomDateApp() }),
-      }],
-      temperature: 1,
-      max_tokens: 3000,
-    });
+  const title = await (new OpenAI).generatePostTitle(
+    Config.getTitlePrompt(lastTitles, { appTitle: randomDateApp() })
+  );
+  console.log(title);
+  const content = await (new OpenAI).generatePostContent(title);
+  console.log(content);
+  // const status = await WpApi.publish(title, content);
 
-    return completion
-      .data
-      .choices[0]
-      .message
-      .content
-      .replace(/[\n]/g, '')
-      .replace(/(^['"]|['"]$)/g, '');
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-const generatePostContent = async title => {
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [
-      { role: 'user', content: `Escribe un post de unas 500 palabras sobre ${title}` },
-    ],
-    temperature: 1,
-    max_tokens: 4000,
-  });
-
-  return completion
-    .data
-    .choices[0]
-    .message
-    .content;
-}
+  //   console.log('Script executed', status);
+};
 
 new CronJob(
 	'30 14 * * *',
-	async () => {
-    console.log('Executing script...');
-
-    const title = await generatePostTitle();
-    const content = await generatePostContent(title);
-
-    const status = await WpApi.publish(title, content);
-
-    console.log('Script executed', status);
-  },
+  newPublication,
 	null,
 	true,
 	'Europe/Madrid'
 );
 
 // test dev
-(async () => {
-  const title = await generatePostTitle();
-  console.log(title);
-  // const content = await generatePostContent(title);
-  // console.log(content);
-  // const status = await publish(title, content);
-})()
+newPublication();
