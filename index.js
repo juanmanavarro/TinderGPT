@@ -7,7 +7,6 @@ import { OpenAI } from './shared/openai.js';
 dotenv.config();
 
 const newPublication = async () => {
-  // return all index.js paths in sites folder
   const sites = fs.readdirSync('./sites');
   for (const site of sites) {
     console.log(`Publishing ${site}...`);
@@ -24,10 +23,10 @@ const newPublication = async () => {
     const lastTitles = await api.getLastPostTitles();
     const titlePrompt = Site.getTitlePrompt(lastTitles);
     const title = await generator.generatePostTitle(titlePrompt);
-    // const content = await generator.generatePostContent(title);
-    // const status = await api.publish(title, content);
+    const content = await generator.generatePostContent(title);
+    const response = await api.publish(title, content);
 
-    console.log(`Published "${title}" at site ${site}`);
+    console.log(`Published "${title}" at site ${site} with status ${response.status}`);
   }
 };
 

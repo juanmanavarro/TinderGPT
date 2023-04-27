@@ -4,24 +4,27 @@ export class WpApi {
   client;
 
   constructor(prefix, url = '') {
+    const authString = process.env[`${prefix}APP_USER`]+':'+process.env[`${prefix}APP_PASSWORD`];
+    const buff = new Buffer.from(authString);
     this.client = axios.create({
       baseURL: url,
       headers: {
-        Authorization: `Bearer ${process.env[`${prefix}WP_API_TOKEN`]}`
+        Authorization: `BASIC ${buff.toString('base64')}`,
       },
     });
   }
 
   async getLastPostTitles() {
     try {
-      const response = await this.client.get(`/posts`, {
+      const { data } = await this.client.get(`/posts`, {
         params: {
           fields: 'title',
           number: 10,
         },
       });
 
-      return response.data.posts.map(p => p.title).join(', ');
+      const posts = data?.posts || data;
+      return posts.map(p => p.title).join(', ');
     } catch (error) {
       if (error.response) {
         // The request was made and the server responded with a status code
@@ -44,11 +47,12 @@ export class WpApi {
 
   async publish(title, content) {
     try {
-      const { status } = await this.client.post(`/posts/new`, {
+      return await this.client.post(`/posts`, {
         title,
         content,
+        status: 'publish',
+        author: 2,
       });
-      return status;
     } catch (error) {
       console.log(error);
     }
