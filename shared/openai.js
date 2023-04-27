@@ -48,15 +48,15 @@ export class OpenAI {
     }
   }
 
-  async generatePostContent(title) {
+  async generatePostContent(prompt) {
     try {
       const completion = await this.client.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: 'user', content: `Escribe un post de unas 500 palabras sobre ${title}` },
+          { role: 'user', content: prompt },
         ],
         temperature: 1,
-        max_tokens: 4000,
+        max_tokens: 3000,
       });
 
       return completion

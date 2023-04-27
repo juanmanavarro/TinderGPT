@@ -23,7 +23,13 @@ const newPublication = async () => {
     const lastTitles = await api.getLastPostTitles();
     const titlePrompt = Site.getTitlePrompt(lastTitles);
     const title = await generator.generatePostTitle(titlePrompt);
-    const content = await generator.generatePostContent(title);
+    const postPrompt = Site.getPostPrompt(title);
+    const content = await generator.generatePostContent(postPrompt);
+    if ( !title || !content ) {
+      console.log(`Skipping ${site} because title or content is empty`);
+      continue;
+    }
+
     const response = await api.publish(title, content);
 
     console.log(`Published "${title}" at site ${site} with status ${response.status}`);
