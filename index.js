@@ -7,9 +7,31 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+const spanishDateApps = [
+  'Tinder',
+  'Badoo',
+  'Meetic',
+  'Bumble',
+  'AdoptaUnChico',
+  'Happn',
+  'OkCupid',
+  'POF',
+  'eDarling',
+  'Lovoo',
+  'Hinge',
+  'Grindr',
+];
+
+const randomDateApp = () => {
+  const randomIndex = Math.floor(Math.random() * spanishDateApps.length);
+  return spanishDateApps[randomIndex];
+};
+
+console.log(randomDateApp());
+
 const generatePostTitle = async () => {
   try {
-    const response = await axios.get(`https://public-api.wordpress.com/rest/v1.1/sites/${process.env.WP_URL}/posts`, {
+    const response = await axios.get(`${process.env.WP_URL}/posts`, {
       headers: {
         Authorization: `Bearer ${process.env.WP_API_TOKEN}`
       },
@@ -23,9 +45,10 @@ const generatePostTitle = async () => {
 
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [
-        { role: 'user', content: `Dame el titulo para un post de un blog sobre la aplicacion de citas Tinder, que sea totalmente diferente a cualquiera de estos; ${lastTitles}` },
-      ],
+      messages: [{
+        role: 'user',
+        content: `Dame el titulo para un post de un blog sobre la aplicacion de citas ${randomDateApp()}, que sea totalmente diferente a cualquiera de estos: ${lastTitles}`
+      }],
       temperature: 1,
       max_tokens: 3000,
     });
@@ -53,15 +76,18 @@ const generatePostContent = async title => {
   });
 
   return completion
-      .data
-      .choices[0]
-      .message
-      .content;
+    .data
+    .choices[0]
+    .message
+    .content;
 }
 
 const publish = async (title, content) => {
   try {
-    const { status } = await axios.post(`https://public-api.wordpress.com/rest/v1.1/sites/${process.env.WP_URL}/posts/new`, { title, content }, {
+    const { status } = await axios.post(`${process.env.WP_URL}/posts/new`, {
+      title,
+      content,
+    }, {
       headers: {
         Authorization: `Bearer ${process.env.WP_API_TOKEN}`
       },
@@ -89,3 +115,12 @@ new CronJob(
 	true,
 	'Europe/Madrid'
 );
+
+// test dev
+(async () => {
+  const title = await generatePostTitle();
+  console.log(title);
+  // const content = await generatePostContent(title);
+  // console.log(content);
+  // const status = await publish(title, content);
+})()
