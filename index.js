@@ -1,5 +1,4 @@
 import { Configuration, OpenAIApi } from "openai";
-import axios from 'axios';
 import { CronJob } from 'cron';
 import dotenv from 'dotenv';
 import { Config } from './sites/citas-online.info/config.js';
@@ -73,23 +72,6 @@ const generatePostContent = async title => {
     .content;
 }
 
-const publish = async (title, content) => {
-  try {
-    const { status } = await axios.post(`${process.env[`${Config.prefix}WP_URL`]}/posts/new`, {
-      title,
-      content,
-    }, {
-      headers: {
-        Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
-      },
-    });
-
-    return status;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 new CronJob(
 	'30 14 * * *',
 	async () => {
@@ -98,7 +80,7 @@ new CronJob(
     const title = await generatePostTitle();
     const content = await generatePostContent(title);
 
-    const status = await publish(title, content);
+    const status = await WpApi.publish(title, content);
 
     console.log('Script executed', status);
   },

@@ -19,4 +19,20 @@ export class WpApi {
       console.error(error);
     }
   }
+
+  static async publish(title, content) {
+    try {
+      const { status } = await axios.post(`${process.env[`${Config.prefix}WP_URL`]}/posts/new`, {
+        title,
+        content,
+      }, {
+        headers: {
+          Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
+        },
+      });
+      return status;
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
