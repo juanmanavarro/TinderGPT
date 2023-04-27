@@ -1,4 +1,9 @@
 export default class Site {
+  static production = false;
+  static url = 'https://citas-online.info';
+  static apiUrl = 'https://citas-online.info/wp-json/wp/v2';
+  static prefix = 'TINDER_GPT_';
+
   static getTitlePrompt(lastTitles) {
     const spanishDateApps = [
       'Tinder',
