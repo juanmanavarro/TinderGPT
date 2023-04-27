@@ -6,6 +6,8 @@ import { OpenAI } from './shared/openai.js';
 
 dotenv.config();
 
+console.log('Starting cron job...');
+
 const newPublication = async () => {
   const sites = fs.readdirSync('./sites');
   for (const site of sites) {
