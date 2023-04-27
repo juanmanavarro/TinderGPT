@@ -37,7 +37,7 @@ const newPublication = async () => {
 };
 
 new CronJob(
-	'30 14 * * *',
+	'0 */12 * * *',
   newPublication,
 	null,
 	true,
