@@ -2,6 +2,8 @@ import { Configuration, OpenAIApi } from "openai";
 import axios from 'axios';
 import { CronJob } from 'cron';
 import dotenv from 'dotenv';
+import { Config } from './sites/citas-online.info/config.js';
+import { WpApi } from './shared/wp-api.js';
 
 dotenv.config();
 const configuration = new Configuration({
@@ -29,27 +31,14 @@ const randomDateApp = () => {
   return spanishDateApps[randomIndex];
 };
 
-console.log(randomDateApp());
-
 const generatePostTitle = async () => {
+  const lastTitles = WpApi.getLastPostTitles();
   try {
-    const response = await axios.get(`${process.env.WP_URL}/posts`, {
-      headers: {
-        Authorization: `Bearer ${process.env.WP_API_TOKEN}`
-      },
-      params: {
-        fields: 'title',
-        number: 10,
-      },
-    });
-
-    const lastTitles = response.data.posts.map(p => p.title).join(', ');
-
     const completion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [{
         role: 'user',
-        content: `Dame el titulo para un post de un blog sobre la aplicacion de citas ${randomDateApp()}, que sea totalmente diferente a cualquiera de estos: ${lastTitles}`
+        content: Config.getTitlePrompt(lastTitles, { appTitle: randomDateApp() }),
       }],
       temperature: 1,
       max_tokens: 3000,
@@ -86,12 +75,12 @@ const generatePostContent = async title => {
 
 const publish = async (title, content) => {
   try {
-    const { status } = await axios.post(`${process.env.WP_URL}/posts/new`, {
+    const { status } = await axios.post(`${process.env[`${Config.prefix}WP_URL`]}/posts/new`, {
       title,
       content,
     }, {
       headers: {
-        Authorization: `Bearer ${process.env.WP_API_TOKEN}`
+        Authorization: `Bearer ${process.env[`${Config.prefix}WP_API_TOKEN`]}`
       },
     });
 
