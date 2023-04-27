@@ -3,11 +3,11 @@ import axios from 'axios';
 export class WpApi {
   client;
 
-  constructor(prefix, url = '') {
+  constructor({ prefix, apiUrl }) {
     const authString = process.env[`${prefix}APP_USER`]+':'+process.env[`${prefix}APP_PASSWORD`];
     const buff = new Buffer.from(authString);
     this.client = axios.create({
-      baseURL: url,
+      baseURL: apiUrl,
       headers: {
         Authorization: `BASIC ${buff.toString('base64')}`,
       },
@@ -24,7 +24,7 @@ export class WpApi {
       });
 
       const posts = data?.posts || data;
-      return posts.map(p => p.title).join(', ');
+      return posts.map(p => p.title.rendered).join(', ');
     } catch (error) {
       if (error.response) {
         // The request was made and the server responded with a status code

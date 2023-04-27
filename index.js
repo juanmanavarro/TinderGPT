@@ -14,11 +14,11 @@ const newPublication = async () => {
     const { default: Site } = await import(`./sites/${site}/index.js`);
     if ( !Site.production ) {
       console.log(`Skipping ${site} because it's not in production mode`);
-      return;
+      continue;
     }
 
     const generator = new OpenAI();
-    const api = new WpApi(Site.prefix, Site.apiUrl);
+    const api = new WpApi(Site);
 
     const lastTitles = await api.getLastPostTitles();
     const titlePrompt = Site.getTitlePrompt(lastTitles);

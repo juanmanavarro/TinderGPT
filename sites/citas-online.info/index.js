@@ -23,6 +23,6 @@ export default class Site {
 
     const randomIndex = Math.floor(Math.random() * spanishDateApps.length);
 
-    return `Dame el titulo para un post de un blog sobre la aplicacion de citas ${spanishDateApps[randomIndex]}, que sea totalmente diferente a cualquiera de estos: ${lastTitles}`;
+    return `Eres un experto en estas aplicaciones de citas: ${spanishDateApps.join(', ')}. Las has usado todas. Sabes todo de como funcionan y trucos para usarlas mas eficientemente. Vas a escribir un blog sobre toda la experiencia que tienes, de una manera amena. Dame el titulo para un post de un blog sobre la aplicacion de citas ${spanishDateApps[randomIndex]}, que sea totalmente diferente a cualquiera de estos: ${lastTitles}`;
   }
 }
