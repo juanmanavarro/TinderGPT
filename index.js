@@ -1,7 +1,9 @@
-require('dotenv').config();
-const { Configuration, OpenAIApi } = require("openai");
-const axios = require('axios');
-var CronJob = require('cron').CronJob;
+import { Configuration, OpenAIApi } from "openai";
+import axios from 'axios';
+import { CronJob } from 'cron';
+import dotenv from 'dotenv';
+
+dotenv.config();
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
